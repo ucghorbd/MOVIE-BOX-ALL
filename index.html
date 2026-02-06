@@ -4316,7 +4316,7 @@
             });
         }
 
-        // === NEW: SEARCH SYSTEM FUNCTIONS ===
+        // NEW: SEARCH SYSTEM FUNCTIONS
         
         // 1. Open Search Screen
         function openSearchScreen() {
@@ -4659,11 +4659,26 @@
                 `;
                 return;
             }
-            
+
+            // Filter movies and series by visible categories
+            const visibleMovies = allMovies.filter(movie => {
+                if (!movie.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === movie.category);
+                return categoryObj !== undefined;
+            });
+
+            const visibleSeries = allSeries.filter(series => {
+                if (!series.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === series.category);
+                return categoryObj !== undefined;
+            });
+
             // Combine all content
             const allContent = [
-                ...allMovies.map(item => ({ ...item, type: 'movie', searchType: 'movie' })),
-                ...allSeries.map(item => ({ ...item, type: 'series', searchType: 'series' })),
+                ...visibleMovies.map(item => ({ ...item, type: 'movie', searchType: 'movie' })),
+                ...visibleSeries.map(item => ({ ...item, type: 'series', searchType: 'series' })),
                 ...allLiveTV.map(item => ({ ...item, type: 'livetv', searchType: 'livetv', title: item.name }))
             ];
             
@@ -4782,9 +4797,9 @@
                 loadWebSeriesCategories();
             });
             
-            // Load categories
+            // Load categories with visibility filter
             db.collection('categories')
-                .where('visible', '==', true)
+                .where('visible', '==', true) // ✅ FIXED: Only load visible categories
                 .orderBy('order', 'asc')
                 .onSnapshot((snapshot) => {
                 allCategories = [];
@@ -4932,11 +4947,15 @@
             }
             
             setTimeout(() => {
-                // Extract unique categories from allSeries
+                // Extract unique categories from allSeries that are in allCategories (visible)
                 const categoriesSet = new Set();
                 allSeries.forEach(series => {
                     if (series.category && series.category.trim() !== '') {
-                        categoriesSet.add(series.category.trim());
+                        // Check if this category is in allCategories (visible)
+                        const catFromAll = allCategories.find(cat => cat.name === series.category.trim());
+                        if (catFromAll) {
+                            categoriesSet.add(series.category.trim());
+                        }
                     }
                 });
                 
@@ -5008,11 +5027,15 @@
             }
             
             setTimeout(() => {
-                // Extract unique categories from allMovies
+                // Extract unique categories from allMovies that are in allCategories (visible)
                 const categoriesSet = new Set();
                 allMovies.forEach(movie => {
                     if (movie.category && movie.category.trim() !== '') {
-                        categoriesSet.add(movie.category.trim());
+                        // Check if this category is in allCategories (visible)
+                        const catFromAll = allCategories.find(cat => cat.name === movie.category.trim());
+                        if (catFromAll) {
+                            categoriesSet.add(movie.category.trim());
+                        }
                     }
                 });
                 
@@ -5137,9 +5160,24 @@
             });
         }
 
-        // FIXED: Slider banner now clickable
+        // ✅ FIXED: Slider banner now clickable AND filters by visible categories
         function renderFeaturedSlider() {
-            const featured = [...allMovies, ...allSeries].slice(0, 5);
+            // Filter movies and series by visible categories
+            const visibleMovies = allMovies.filter(movie => {
+                if (!movie.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === movie.category);
+                return categoryObj !== undefined;
+            });
+
+            const visibleSeries = allSeries.filter(series => {
+                if (!series.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === series.category);
+                return categoryObj !== undefined;
+            });
+
+            const featured = [...visibleMovies, ...visibleSeries].slice(0, 5);
             const slider = document.getElementById('featured-slider');
             const indicators = document.getElementById('slider-indicators');
             
@@ -5189,6 +5227,7 @@
             }
         }
 
+        // ✅ FIXED: Home page categories - Now only shows categories that are visible
         function loadCategories() {
             const container = document.getElementById('categories-container');
             container.innerHTML = '';
@@ -5197,6 +5236,14 @@
             if (!window.adultVisible) {
                 filteredMovies = filteredMovies.filter(item => !item.isAdult);
             }
+
+            // First filter movies by visible categories
+            filteredMovies = filteredMovies.filter(movie => {
+                if (!movie.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === movie.category);
+                return categoryObj !== undefined;
+            });
             
             const categories = {};
             filteredMovies.forEach(item => {
@@ -5208,8 +5255,10 @@
                 }
             });
             
-            // Sort categories by order from allCategories array
-            const sortedCategoryNames = Object.keys(categories).sort((a, b) => {
+            // Sort categories by order from allCategories array and only include visible categories
+            const sortedCategoryNames = Object.keys(categories).filter(catName => 
+                allCategories.some(cat => cat.name === catName)
+            ).sort((a, b) => {
                 const catA = allCategories.find(cat => cat.name === a);
                 const catB = allCategories.find(cat => cat.name === b);
                 const orderA = catA ? (catA.order || 999) : 999;
@@ -5729,6 +5778,7 @@
             }
         }
 
+        // ✅ FIXED: Watchlist now filters by visible categories
         async function loadWatchlist() {
             if (!currentUser) return;
             
@@ -5745,12 +5795,25 @@
                 let html = '<div class="content-grid">';
                 watchlistSnapshot.forEach(doc => {
                     const item = doc.data();
-                    html += `
-                        <div class="content-card" onclick="${item.type === 'series' ? `showWebSeriesDetail('${item.contentId}')` : `showDetail('${item.contentId}', '${item.type}')`}">
-                            <img src="${item.poster || 'https://via.placeholder.com/150x225'}" alt="${item.title}">
-                            <div class="content-title">${item.title}</div>
-                        </div>
-                    `;
+                    let content;
+                    if (item.type === 'series') {
+                        content = allSeries.find(s => s.id === item.contentId);
+                    } else {
+                        content = allMovies.find(m => m.id === item.contentId);
+                    }
+                    // Only show if content exists and its category is visible
+                    if (content && content.category) {
+                        // Check if category is visible
+                        const categoryObj = allCategories.find(cat => cat.name === content.category);
+                        if (categoryObj) {
+                            html += `
+                                <div class="content-card" onclick="${item.type === 'series' ? `showWebSeriesDetail('${item.contentId}')` : `showDetail('${item.contentId}', '${item.type}')`}">
+                                    <img src="${item.poster || 'https://via.placeholder.com/150x225'}" alt="${item.title}">
+                                    <div class="content-title">${item.title}</div>
+                                </div>
+                            `;
+                        }
+                    }
                 });
                 html += '</div>';
                 container.innerHTML = html;
@@ -6603,10 +6666,26 @@
             }
         }
 
+        // ✅ FIXED: Global search now filters by visible categories
         function performGlobalSearchOld(searchTerm) {
+            // Filter movies and series by visible categories
+            const visibleMovies = allMovies.filter(movie => {
+                if (!movie.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === movie.category);
+                return categoryObj !== undefined;
+            });
+
+            const visibleSeries = allSeries.filter(series => {
+                if (!series.category) return false;
+                // Check if category exists and is visible
+                const categoryObj = allCategories.find(cat => cat.name === series.category);
+                return categoryObj !== undefined;
+            });
+
             const allContent = [
-                ...allMovies.map(item => ({ ...item, type: 'movie' })),
-                ...allSeries.map(item => ({ ...item, type: 'series' })),
+                ...visibleMovies.map(item => ({ ...item, type: 'movie' })),
+                ...visibleSeries.map(item => ({ ...item, type: 'series' })),
                 ...allLiveTV.map(item => ({ ...item, type: 'livetv' }))
             ];
             
