@@ -4911,7 +4911,83 @@
             successState.style.display = 'none';
         }
 
-        // Load movie categories for Movies page
+        // ✅ FIXED: Web Series Categories Loading - Now properly extracts categories from webseries collection
+        function loadWebSeriesCategories() {
+            const container = document.getElementById('webseries-categories-container');
+            
+            document.getElementById('webseries-loading-state').style.display = 'block';
+            document.getElementById('webseries-empty-state').style.display = 'none';
+            document.getElementById('webseries-error-state').style.display = 'none';
+            document.getElementById('webseries-success-state').style.display = 'none';
+            
+            // First check if we have series data
+            if (allSeries.length === 0) {
+                setTimeout(() => {
+                    document.getElementById('webseries-loading-state').style.display = 'none';
+                    document.getElementById('webseries-empty-state').style.display = 'block';
+                }, 1000);
+                return;
+            }
+            
+            setTimeout(() => {
+                // Extract unique categories from allSeries
+                const categoriesSet = new Set();
+                allSeries.forEach(series => {
+                    if (series.category && series.category.trim() !== '') {
+                        categoriesSet.add(series.category.trim());
+                    }
+                });
+                
+                const uniqueCategories = Array.from(categoriesSet);
+                
+                if (uniqueCategories.length === 0) {
+                    document.getElementById('webseries-loading-state').style.display = 'none';
+                    document.getElementById('webseries-empty-state').style.display = 'block';
+                    return;
+                }
+                
+                // Get category info from allCategories if available
+                const categoriesWithInfo = uniqueCategories.map(catName => {
+                    const catFromAll = allCategories.find(cat => 
+                        cat.name === catName && (cat.type === 'series' || !cat.type)
+                    );
+                    
+                    return {
+                        name: catName,
+                        order: catFromAll ? (catFromAll.order || 999) : 999,
+                        type: catFromAll ? catFromAll.type : undefined
+                    };
+                });
+                
+                // Sort by order
+                categoriesWithInfo.sort((a, b) => a.order - b.order);
+                
+                let html = '<div class="webseries-category-grid">';
+                
+                categoriesWithInfo.forEach(category => {
+                    const seriesCount = allSeries.filter(series => 
+                        series.category === category.name
+                    ).length;
+                    
+                    html += `
+                        <div class="webseries-category-card" onclick="showWebSeriesByCategory('${category.name}')">
+                            <i class="fas fa-tv"></i>
+                            <span>${category.name}</span>
+                            <small style="margin-top: 5px; color: var(--secondary-text-color);">${seriesCount} series</small>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                document.getElementById('webseries-loading-state').style.display = 'none';
+                document.getElementById('webseries-success-state').style.display = 'block';
+                document.getElementById('webseries-success-state').innerHTML = html;
+                
+            }, 1000);
+        }
+
+        // ✅ FIXED: Movies Categories Loading - Similar fix for movies
         function loadMoviesCategories() {
             const container = document.getElementById('movies-categories-container');
             
@@ -4920,7 +4996,8 @@
             document.getElementById('movies-error-state').style.display = 'none';
             document.getElementById('movies-success-state').style.display = 'none';
             
-            if (allCategories.length === 0) {
+            // First check if we have movies data
+            if (allMovies.length === 0) {
                 setTimeout(() => {
                     document.getElementById('movies-loading-state').style.display = 'none';
                     document.getElementById('movies-empty-state').style.display = 'block';
@@ -4929,24 +5006,45 @@
             }
             
             setTimeout(() => {
-                let html = '<div class="movies-category-grid">';
-                const movieCategories = allCategories.filter(cat => cat.type === 'movie' || !cat.type);
-                
-                // Additional client-side sorting for safety
-                movieCategories.sort((a, b) => {
-                    const orderA = Number(a.order) || 999;
-                    const orderB = Number(b.order) || 999;
-                    return orderA - orderB;
+                // Extract unique categories from allMovies
+                const categoriesSet = new Set();
+                allMovies.forEach(movie => {
+                    if (movie.category && movie.category.trim() !== '') {
+                        categoriesSet.add(movie.category.trim());
+                    }
                 });
                 
-                if (movieCategories.length === 0) {
+                const uniqueCategories = Array.from(categoriesSet);
+                
+                if (uniqueCategories.length === 0) {
                     document.getElementById('movies-loading-state').style.display = 'none';
                     document.getElementById('movies-empty-state').style.display = 'block';
                     return;
                 }
                 
-                movieCategories.forEach(category => {
-                    const movieCount = allMovies.filter(movie => movie.category === category.name).length;
+                // Get category info from allCategories if available
+                const categoriesWithInfo = uniqueCategories.map(catName => {
+                    const catFromAll = allCategories.find(cat => 
+                        cat.name === catName && (cat.type === 'movie' || !cat.type)
+                    );
+                    
+                    return {
+                        name: catName,
+                        order: catFromAll ? (catFromAll.order || 999) : 999,
+                        type: catFromAll ? catFromAll.type : undefined
+                    };
+                });
+                
+                // Sort by order
+                categoriesWithInfo.sort((a, b) => a.order - b.order);
+                
+                let html = '<div class="movies-category-grid">';
+                
+                categoriesWithInfo.forEach(category => {
+                    const movieCount = allMovies.filter(movie => 
+                        movie.category === category.name
+                    ).length;
+                    
                     html += `
                         <div class="category-card" onclick="showMoviesByCategory('${category.name}')">
                             <i class="fas fa-film"></i>
@@ -4969,60 +5067,6 @@
             document.getElementById('movies-loading-state').style.display = 'none';
             document.getElementById('movies-empty-state').style.display = 'none';
             document.getElementById('movies-error-state').style.display = 'block';
-        }
-
-        // Load web series categories for Web Series page
-        function loadWebSeriesCategories() {
-            const container = document.getElementById('webseries-categories-container');
-            
-            document.getElementById('webseries-loading-state').style.display = 'block';
-            document.getElementById('webseries-empty-state').style.display = 'none';
-            document.getElementById('webseries-error-state').style.display = 'none';
-            document.getElementById('webseries-success-state').style.display = 'none';
-            
-            if (allCategories.length === 0) {
-                setTimeout(() => {
-                    document.getElementById('webseries-loading-state').style.display = 'none';
-                    document.getElementById('webseries-empty-state').style.display = 'block';
-                }, 1000);
-                return;
-            }
-            
-            setTimeout(() => {
-                let html = '<div class="webseries-category-grid">';
-                const seriesCategories = allCategories.filter(cat => cat.type === 'series' || !cat.type);
-                
-                // Additional client-side sorting for safety
-                seriesCategories.sort((a, b) => {
-                    const orderA = Number(a.order) || 999;
-                    const orderB = Number(b.order) || 999;
-                    return orderA - orderB;
-                });
-                
-                if (seriesCategories.length === 0) {
-                    document.getElementById('webseries-loading-state').style.display = 'none';
-                    document.getElementById('webseries-empty-state').style.display = 'block';
-                    return;
-                }
-                
-                seriesCategories.forEach(category => {
-                    const seriesCount = allSeries.filter(series => series.category === category.name).length;
-                    html += `
-                        <div class="webseries-category-card" onclick="showWebSeriesByCategory('${category.name}')">
-                            <i class="fas fa-tv"></i>
-                            <span>${category.name}</span>
-                            <small style="margin-top: 5px; color: var(--secondary-text-color);">${seriesCount} series</small>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                
-                document.getElementById('webseries-loading-state').style.display = 'none';
-                document.getElementById('webseries-success-state').style.display = 'block';
-                document.getElementById('webseries-success-state').innerHTML = html;
-                
-            }, 1000);
         }
 
         function showWebSeriesErrorState() {
@@ -5532,6 +5576,7 @@
             }
         }
 
+        // ✅ FIXED: Web Series Detail UI - Episodes properly loaded
         async function updateWebSeriesDetailUI(content) {
             document.getElementById('webseries-detail-title').textContent = content.title;
             document.getElementById('webseries-detail-backdrop-img').src = content.backdrop || content.poster || '';
@@ -5552,19 +5597,28 @@
             document.getElementById('webseries-detail-language').textContent = content.language || 'N/A';
             
             // Update episodes count
-            const episodesCount = content.episodes ? content.episodes.length : 0;
+            let episodesCount = 0;
+            if (content.episodes && Array.isArray(content.episodes)) {
+                episodesCount = content.episodes.length;
+            }
             document.getElementById('webseries-detail-episodes').textContent = episodesCount;
             
             // Load episodes
             const episodesList = document.getElementById('episodes-list');
-            if (content.episodes && content.episodes.length > 0) {
+            if (content.episodes && Array.isArray(content.episodes) && content.episodes.length > 0) {
                 let episodesHTML = '';
                 content.episodes.forEach((episode, index) => {
+                    // Handle different episode structures
+                    const episodeNo = episode.episodeNo || (index + 1);
+                    const episodeTitle = episode.title || `Episode ${episodeNo}`;
+                    const posterUrl = episode.posterUrl || content.poster || '';
+                    const streamUrl = episode.streamUrl || '';
+                    
                     episodesHTML += `
                         <div class="episode-card" onclick="playWebSeriesEpisode('${content.id}', ${index})">
-                            <div class="episode-number">${index + 1}</div>
+                            <div class="episode-number">${episodeNo}</div>
                             <div class="episode-info">
-                                <div class="episode-title">${episode.title || `Episode ${index + 1}`}</div>
+                                <div class="episode-title">${episodeTitle}</div>
                                 <div class="episode-duration">Click to play</div>
                             </div>
                             <button class="episode-play-btn">
@@ -5764,6 +5818,7 @@
             playWebSeriesEpisode(currentWebSeries.id, 0);
         }
 
+        // ✅ FIXED: Web Series Episode Playback
         function playWebSeriesEpisode(seriesId, episodeIndex) {
             const series = allSeries.find(item => item.id === seriesId);
             if (!series || !series.episodes || series.episodes.length <= episodeIndex) {
