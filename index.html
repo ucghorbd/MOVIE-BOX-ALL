@@ -1887,42 +1887,10 @@
             100% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0); }
         }
         
-        /* NEW: Floating Telegram Icon */
-        #telegram-fab {
-            position: fixed;
-            bottom: 155px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background-color: #0088cc;
-            color: white;
-            border-radius: 50%;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 999;
-            animation: telegram-pulse 2s infinite;
-            transition: transform 0.3s;
-        }
-        
-        #telegram-fab:hover {
-            transform: scale(1.1);
-            animation-play-state: paused;
-        }
-        
-        @keyframes telegram-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 136, 204, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0); }
-        }
-
         /* NEW: Floating Web Series Icon */
         #webseries-fab {
             position: fixed;
-            bottom: 225px;
+            bottom: 155px;
             right: 20px;
             width: 60px;
             height: 60px;
@@ -2641,13 +2609,6 @@
             color: white;
         }
         
-        .detail-action-btn.like {
-            background: linear-gradient(135deg, #ff2fb3, #ff6a00);
-            color: white;
-            z-index: 1001 !important;
-            position: relative;
-        }
-        
         .detail-action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -2678,12 +2639,6 @@
         }
         
         /* ✅ FIXED: LIKE BUTTON CLICK ISSUE FIXES */
-        #like-btn {
-            z-index: 1001 !important;
-            position: relative !important;
-            pointer-events: auto !important;
-        }
-        
         .detail-content {
             position: relative;
             z-index: 100;
@@ -3391,16 +3346,8 @@
                         <li class="list-group-item" onclick="navigateTo('watchlist-page')">
                             <i class="fas fa-bookmark"></i> My Watchlist
                         </li>
-                        <li class="list-group-item" onclick="openRequestModal()">
-                            <i class="fas fa-envelope-open-text"></i> Request Content
-                        </li>
-                        <!-- NEW: Apply Coupon Menu Item -->
                         <li class="list-group-item" onclick="navigateTo('redeem-page')">
                             <i class="fas fa-gift"></i> Apply Coupon
-                        </li>
-                        <!-- NEW: Join Telegram Menu Item -->
-                        <li class="list-group-item" onclick="window.open('https://t.me/viralmemb_r', '_blank')">
-                            <i class="fab fa-telegram"></i> Join Telegram
                         </li>
                         <li class="list-group-item" onclick="openComplaintModal()">
                             <i class="fas fa-headset"></i> Support & Complaint
@@ -3511,10 +3458,6 @@
                                 <i class="fas fa-eye"></i>
                                 <span id="detail-views">0</span> views
                             </div>
-                            <div class="stat-item">
-                                <i class="fas fa-heart"></i>
-                                <span id="detail-likes">0</span> likes
-                            </div>
                         </div>
                         
                         <!-- Main Action Buttons -->
@@ -3531,9 +3474,6 @@
                         <div class="detail-action-buttons">
                             <button class="detail-action-btn download" id="download-btn">
                                 <i class="fas fa-download"></i> Download
-                            </button>
-                            <button class="detail-action-btn like" id="like-btn">
-                                <i class="fas fa-heart"></i> Like (<span id="like-count">0</span>)
                             </button>
                         </div>
                     </div>
@@ -3593,41 +3533,6 @@
                 </div>
             </div>
 
-            <!-- REQUESTS PAGE -->
-            <div id="requests-page" class="page">
-                <div class="header">
-                    <div class="logo-container">
-                        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
-                        <div class="logo">Request Content</div>
-                    </div>
-                </div>
-
-                <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
-                    <div class="section-card" style="background-color: var(--card-bg); border-radius: 10px; padding: 20px; border: 1px solid var(--border-color);">
-                        <h3 style="margin-bottom: 15px;">Submit a Request</h3>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label>Movie/Series Name</label>
-                            <input type="text" id="request-title" placeholder="Enter title..." style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label>Type</label>
-                            <select id="request-type" style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);">
-                                <option value="movie">Movie</option>
-                                <option value="series">Web Series</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label>Additional Notes (Optional)</label>
-                            <textarea id="request-notes" placeholder="Any specific details..." style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); min-height: 100px;"></textarea>
-                        </div>
-                        <button class="btn" onclick="submitRequest()">
-                            <i class="fas fa-paper-plane"></i> Submit Request
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- POLL PAGE REMOVED -->
         </main>
 
@@ -3663,11 +3568,6 @@
         <!-- FLOATING COMPLAINT BUTTON -->
         <div id="complaint-fab" onclick="openComplaintModal()">
             <i class="fas fa-headset"></i>
-        </div>
-
-        <!-- FLOATING TELEGRAM BUTTON -->
-        <div id="telegram-fab" onclick="openTelegramLink()">
-            <i class="fab fa-telegram"></i>
         </div>
 
         <!-- FULL SCREEN PAGES -->
@@ -3750,35 +3650,6 @@
                         <div class="theme-preview-mockup"></div>
                         <div class="theme-name">Minimal Light</div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Request Modal -->
-        <div class="modal-overlay" id="request-modal">
-            <div class="modal-content">
-                <div class="modal-header" style="padding: 20px; border-bottom: 1px solid var(--border-color);">
-                    <h3 style="margin: 0;">Request Content</h3>
-                    <button class="modal-close" onclick="closeModal('request-modal')">&times;</button>
-                </div>
-                <div class="modal-body" style="padding: 20px;">
-                    <div class="checkout-form-group">
-                        <label>Movie/Series Name</label>
-                        <input type="text" id="request-title-modal" placeholder="Enter title..." style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);">
-                    </div>
-                    <div class="checkout-form-group">
-                        <label>Type</label>
-                        <select id="request-type-modal" style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);">
-                            <option value="movie">Movie</option>
-                            <option value="series">Web Series</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="checkout-form-group">
-                        <label>Additional Notes (Optional)</label>
-                        <textarea id="request-notes-modal" placeholder="Any specific details..." style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); min-height: 100px;"></textarea>
-                    </div>
-                    <button class="btn checkout-btn" onclick="submitRequestModal()">Submit Request</button>
                 </div>
             </div>
         </div>
@@ -3972,12 +3843,6 @@
                 series: true,
                 livetv: false
             }
-        };
-        
-        // Telegram floating button settings
-        let telegramSettings = {
-            enabled: false,
-            link: ""
         };
         
         let currentPlayingType = 'movie';
@@ -4439,22 +4304,6 @@
                         console.log('Floating ads settings loaded:', floatingAdsSettings);
                     }
                     
-                    // Load Telegram settings
-                    if (appSettings.floatingAdsAllPageEnabled !== undefined) {
-                        telegramSettings.enabled = appSettings.floatingAdsAllPageEnabled;
-                        telegramSettings.link = appSettings.floatingAdsAllPage || "";
-                        
-                        // Show/hide Telegram button based on settings
-                        const telegramFab = document.getElementById('telegram-fab');
-                        if (telegramFab) {
-                            if (telegramSettings.enabled) {
-                                telegramFab.style.display = 'flex';
-                            } else {
-                                telegramFab.style.display = 'none';
-                            }
-                        }
-                    }
-                    
                     if (appSettings.logoText) {
                         const logos = document.querySelectorAll('.logo');
                         logos.forEach(logo => {
@@ -4463,16 +4312,6 @@
                     }
                 }
             });
-        }
-
-        // === TELEGRAM FLOATING BUTTON FUNCTIONS ===
-        function openTelegramLink() {
-            if (!telegramSettings.link || telegramSettings.link.trim() === '') {
-                alert('এই মুহূর্তে কোনো Telegram link সেট করা নেই। পরে আবার চেষ্টা করুন।');
-                return;
-            }
-            
-            window.open(telegramSettings.link, '_blank');
         }
 
         // === NEW: SEARCH SYSTEM FUNCTIONS ===
@@ -5427,7 +5266,6 @@
             
             // ✅ FIXED: Hide floating buttons on detail page
             document.getElementById('complaint-fab').style.display = 'none';
-            document.getElementById('telegram-fab').style.display = 'none';
             document.getElementById('webseries-fab').style.display = 'none';
             
             updateDetailUI(content);
@@ -5444,7 +5282,6 @@
             
             // ✅ FIXED: Hide floating buttons on detail page
             document.getElementById('complaint-fab').style.display = 'none';
-            document.getElementById('telegram-fab').style.display = 'none';
             document.getElementById('webseries-fab').style.display = 'none';
             
             updateWebSeriesDetailUI(content);
@@ -5531,11 +5368,6 @@
             const viewsCount = content.views || 0;
             document.getElementById('detail-views').textContent = viewsCount;
             
-            // Update likes count
-            const likesCount = content.likedVideo || 0;
-            document.getElementById('detail-likes').textContent = likesCount;
-            document.getElementById('like-count').textContent = likesCount;
-            
             // Set up download button
             const downloadBtn = document.getElementById('download-btn');
             if (content.downloadVideo) {
@@ -5548,54 +5380,6 @@
                 downloadBtn.disabled = true;
                 downloadBtn.onclick = null;
             }
-            
-            // ✅ FIXED: LIKE BUTTON CLICK FIX
-            // Set up like button
-            const likeBtn = document.getElementById('like-btn');
-            if (currentUser) {
-                // Check if user has already liked this content
-                const likeRef = db.collection('movies').doc(content.id)
-                    .collection('likes').doc(currentUser.uid);
-                const likeSnap = await likeRef.get();
-                
-                if (likeSnap.exists()) {
-                    likeBtn.disabled = true;
-                    likeBtn.innerHTML = '<i class="fas fa-heart"></i> Liked (<span id="like-count">' + likesCount + '</span>)';
-                    likeBtn.style.opacity = '0.8';
-                    likeBtn.style.cursor = 'default';
-                    likeBtn.onclick = null; // Remove click handler
-                } else {
-                    likeBtn.disabled = false;
-                    likeBtn.style.opacity = '1';
-                    likeBtn.style.cursor = 'pointer';
-                    
-                    // ✅ FIXED: Add proper click handler with event stopPropagation
-                    likeBtn.onclick = function(e) {
-                        e.stopPropagation(); // Prevent event bubbling
-                        e.preventDefault(); // Prevent default behavior
-                        
-                        if (confirm('Do you want to like this video?')) {
-                            handleLike(content.id);
-                        }
-                    };
-                    
-                    likeBtn.innerHTML = '<i class="fas fa-heart"></i> Like (<span id="like-count">' + likesCount + '</span>)';
-                }
-            } else {
-                likeBtn.disabled = false;
-                likeBtn.style.opacity = '1';
-                likeBtn.style.cursor = 'pointer';
-                likeBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    alert('Please login to like this content');
-                };
-            }
-            
-            // Ensure like button is clickable
-            likeBtn.style.pointerEvents = 'auto';
-            likeBtn.style.position = 'relative';
-            likeBtn.style.zIndex = '1001';
             
             if (currentUser) {
                 const watchlistDoc = await db.collection('users').doc(currentUser.uid)
@@ -5805,59 +5589,6 @@
                         watchlistBtn.innerHTML = '<i class="far fa-bookmark"></i> Add to Watchlist';
                     }
                 }
-            }
-        }
-
-        // ✅ FIXED: LIKE FUNCTION এখন Firestore-এ increment করবে
-        async function handleLike(contentId) {
-            if (!currentUser) {
-                alert('Please login to like this content');
-                return;
-            }
-            
-            const userId = currentUser.uid;
-            const movieRef = db.collection('movies').doc(contentId);
-            const likeRef = movieRef.collection('likes').doc(userId);
-            
-            // Check if user already liked
-            const likeSnap = await likeRef.get();
-            if (likeSnap.exists()) {
-                alert('You already liked this video');
-                return;
-            }
-            
-            try {
-                // ✅ FIXED: Firestore-এ likedVideo field increment করা
-                await movieRef.update({
-                    likedVideo: firebase.firestore.FieldValue.increment(1)
-                });
-                
-                // Record user like
-                await likeRef.set({
-                    likedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    userId: userId
-                });
-                
-                // Update currentContent object
-                currentContent.likedVideo = (currentContent.likedVideo || 0) + 1;
-                
-                // Update UI immediately
-                document.getElementById('detail-likes').textContent = currentContent.likedVideo;
-                document.getElementById('like-count').textContent = currentContent.likedVideo;
-                
-                // Update like button state
-                const likeBtn = document.getElementById('like-btn');
-                likeBtn.disabled = true;
-                likeBtn.style.opacity = '0.8';
-                likeBtn.style.cursor = 'default';
-                likeBtn.onclick = null; // Remove click handler
-                likeBtn.innerHTML = '<i class="fas fa-heart"></i> Liked (<span id="like-count">' + currentContent.likedVideo + '</span>)';
-                
-                showToast('Liked!', 'You liked this video');
-                
-            } catch (error) {
-                console.error('Error liking video:', error);
-                alert('Failed to like video. Please try again.');
             }
         }
 
@@ -6285,9 +6016,6 @@
                 if (currentPage && currentPage.id !== 'detail-page' && currentPage.id !== 'webseries-detail-page') {
                     document.getElementById('complaint-fab').style.display = 'flex';
                     document.getElementById('webseries-fab').style.display = 'flex';
-                    if (telegramSettings.enabled) {
-                        document.getElementById('telegram-fab').style.display = 'flex';
-                    }
                 }
             }, 300);
         }
@@ -6610,43 +6338,6 @@
             }
         }
 
-        // === REQUEST FUNCTIONS ===
-        async function submitRequest() {
-            if (!currentUser) {
-                alert('Please login to submit request');
-                return;
-            }
-            
-            const title = document.getElementById('request-title').value.trim();
-            const type = document.getElementById('request-type').value;
-            const notes = document.getElementById('request-notes').value.trim();
-            
-            if (!title) {
-                alert('Please enter a title');
-                return;
-            }
-            
-            try {
-                await db.collection('requests').add({
-                    movieName: title,
-                    type: type,
-                    notes: notes,
-                    requestedBy: currentUser.uid,
-                    userName: currentUser.name,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                alert('Request submitted successfully!');
-                document.getElementById('request-title').value = '';
-                document.getElementById('request-notes').value = '';
-                
-            } catch (error) {
-                console.error('Error submitting request:', error);
-                alert('Failed to submit request. Please try again.');
-            }
-        }
-
         // === COMPLAINT FUNCTIONS ===
         async function submitComplaint() {
             if (!currentUser) {
@@ -6804,9 +6495,6 @@
             // ✅ FIXED: Show floating buttons on profile page
             document.getElementById('complaint-fab').style.display = 'flex';
             document.getElementById('webseries-fab').style.display = 'flex';
-            if (telegramSettings.enabled) {
-                document.getElementById('telegram-fab').style.display = 'flex';
-            }
         }
 
         function openIconSelector() {
@@ -7037,9 +6725,6 @@
                 if (pageId !== 'detail-page' && pageId !== 'webseries-detail-page') {
                     document.getElementById('complaint-fab').style.display = 'flex';
                     document.getElementById('webseries-fab').style.display = 'flex';
-                    if (telegramSettings.enabled) {
-                        document.getElementById('telegram-fab').style.display = 'flex';
-                    }
                 }
             }
             
@@ -7070,13 +6755,9 @@
                     if (pageId === 'detail-page' || pageId === 'webseries-detail-page') {
                         document.getElementById('complaint-fab').style.display = 'none';
                         document.getElementById('webseries-fab').style.display = 'none';
-                        document.getElementById('telegram-fab').style.display = 'none';
                     } else {
                         document.getElementById('complaint-fab').style.display = 'flex';
                         document.getElementById('webseries-fab').style.display = 'flex';
-                        if (telegramSettings.enabled) {
-                            document.getElementById('telegram-fab').style.display = 'flex';
-                        }
                     }
                     
                     switch(pageId) {
@@ -7127,13 +6808,9 @@
                 if (pageId === 'detail-page' || pageId === 'webseries-detail-page') {
                     document.getElementById('complaint-fab').style.display = 'none';
                     document.getElementById('webseries-fab').style.display = 'none';
-                    document.getElementById('telegram-fab').style.display = 'none';
                 } else {
                     document.getElementById('complaint-fab').style.display = 'flex';
                     document.getElementById('webseries-fab').style.display = 'flex';
-                    if (telegramSettings.enabled) {
-                        document.getElementById('telegram-fab').style.display = 'flex';
-                    }
                 }
                 
                 isNavigating = false;
@@ -7226,10 +6903,6 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-        }
-
-        function openRequestModal() {
-            openModal('request-modal');
         }
 
         function openComplaintModal() {
@@ -7391,11 +7064,6 @@
             document.getElementById('bottom-nav').style.display = 'flex';
             document.getElementById('complaint-fab').style.display = 'flex';
             document.getElementById('webseries-fab').style.display = 'flex';
-            
-            // Show Telegram button if enabled
-            if (telegramSettings.enabled) {
-                document.getElementById('telegram-fab').style.display = 'flex';
-            }
             
             setupProfilePage();
             updateAppLockText();
@@ -7581,20 +7249,6 @@
         
         function showCategory(category) {
             showMoviesByCategory(category);
-        }
-        
-        function submitRequestModal() {
-            const title = document.getElementById('request-title-modal').value.trim();
-            const type = document.getElementById('request-type-modal').value;
-            const notes = document.getElementById('request-notes-modal').value.trim();
-            
-            if (!title) {
-                alert('Please enter a title');
-                return;
-            }
-            
-            submitRequest();
-            closeModal('request-modal');
         }
         
         let currentFilters = { searchTerm: '' };
