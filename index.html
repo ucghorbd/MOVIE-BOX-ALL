@@ -3269,8 +3269,9 @@
                         
                         <!-- Main Action Buttons -->
                         <div class="detail-actions">
-                            <button class="btn" onclick="playFirstEpisode()">
-                                <i class="fas fa-play"></i> Play First Episode
+                            <!-- FIXED: "Play First Episode" button removed, replaced with "Like" button -->
+                            <button class="btn" id="webseries-like-btn" onclick="handleLike()">
+                                <i class="fas fa-thumbs-up"></i> Like
                             </button>
                             <button class="btn btn-secondary" id="webseries-watchlist-btn" onclick="toggleWebSeriesWatchlist()">
                                 <i class="far fa-bookmark"></i> Watchlist
@@ -3532,8 +3533,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- POLL PAGE REMOVED -->
         </main>
 
         <!-- BOTTOM NAVIGATION -->
@@ -3574,7 +3573,7 @@
         <!-- Privacy Policy Full Screen -->
         <div class="full-screen-page" id="privacy-policy-full-screen">
             <div class="full-screen-header">
-                <button class="full-screen-back-btn" onclick="closeFullScreenPage('privacy-policy-full-screen')">
+                <button class="full-screen-back-btn" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="full-screen-title">Privacy Policy</div>
@@ -3587,7 +3586,7 @@
         <!-- Purchase Plan Full Screen -->
         <div class="full-screen-page" id="purchase-plan-full-screen">
             <div class="full-screen-header">
-                <button class="full-screen-back-btn" onclick="closeFullScreenPage('purchase-plan-full-screen')">
+                <button class="full-screen-back-btn" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="full-screen-title">Purchase Plan</div>
@@ -3611,7 +3610,7 @@
         <!-- Category Movies Full Screen -->
         <div class="full-screen-page" id="category-movies-full-screen">
             <div class="full-screen-header">
-                <button class="full-screen-back-btn" onclick="closeFullScreenPage('category-movies-full-screen')">
+                <button class="full-screen-back-btn" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="full-screen-title" id="category-movies-title">Category Movies</div>
@@ -3853,6 +3852,9 @@
         // NEW: Search variables
         let userSearchHistory = [];
         let currentSearchQuery = '';
+
+        // FIXED: Action Links duplicate prevention
+        let currentCategoryIdForActionLinks = null;
 
         // === INITIALIZATION ===
         document.addEventListener('DOMContentLoaded', () => {
@@ -5489,6 +5491,12 @@
                     const categoryId = categoryDoc.id;
                     console.log('Found category ID:', categoryId, 'for name:', content.category);
 
+                    // ✅ FIXED: Prevent duplicate action links
+                    if (categoryId === currentCategoryIdForActionLinks) {
+                        return;
+                    }
+                    currentCategoryIdForActionLinks = categoryId;
+
                     const snapshot = await db
                         .collection('category_action_links')
                         .where('category_id', '==', categoryId)
@@ -5644,6 +5652,17 @@
                     }
                 }
             }
+        }
+
+        // ✅ FIXED: NEW LIKE BUTTON FUNCTIONALITY
+        function handleLike() {
+            if (!currentWebSeries || !currentWebSeries.like) {
+                alert("No like link available.");
+                return;
+            }
+            
+            // Open the like URL in new tab
+            window.open(currentWebSeries.like, "_blank");
         }
 
         async function toggleWatchlist() {
@@ -5809,14 +5828,7 @@
             }
         }
 
-        function playFirstEpisode() {
-            if (!currentWebSeries || !currentWebSeries.episodes || currentWebSeries.episodes.length === 0) {
-                alert('No episodes available for this web series.');
-                return;
-            }
-            
-            playWebSeriesEpisode(currentWebSeries.id, 0);
-        }
+        // ✅ REMOVED: playFirstEpisode function removed as per requirement
 
         // ✅ FIXED: Web Series Episode Playback
         function playWebSeriesEpisode(seriesId, episodeIndex) {
