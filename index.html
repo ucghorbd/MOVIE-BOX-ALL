@@ -4074,25 +4074,25 @@
             } catch (error) {
                 console.error('Login error:', error);
                 
-                let errorMessage = 'Login failed. ';
+                let errorMessage = 'লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন। ';
                 switch (error.code) {
                     case 'auth/user-not-found':
-                        errorMessage += 'User not found.';
+                        errorMessage += 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি। অনুগ্রহ করে আগে রেজিস্ট্রেশন করুন।.';
                         break;
                     case 'auth/wrong-password':
-                        errorMessage += 'Incorrect password.';
+                        errorMessage += 'পাসওয়ার্ড ভুল হয়েছে। দয়া করে সঠিক পাসওয়ার্ড দিন।';
                         break;
                     case 'auth/invalid-email':
-                        errorMessage += 'Invalid email address.';
+                        errorMessage += 'অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা লিখুন।';
                         break;
                     case 'auth/user-disabled':
-                        errorMessage += 'This account has been disabled.';
+                        errorMessage += 'এই অ্যাকাউন্টটি বর্তমানে সক্রিয় নয়। সাপোর্ট টিমের সাথে কথা বলুন';
                         break;
                     case 'auth/too-many-requests':
-                        errorMessage += 'Too many failed attempts. Please try again later.';
+                        errorMessage += 'অনেকবার ব্যর্থ চেষ্টা হয়েছে। দয়া করে কিছু সময় অপেক্ষা করুন।';
                         break;
                     default:
-                        errorMessage += 'Please check your credentials.';
+                        errorMessage += 'ইমেইল বা পাসওয়ার্ড ভুল হতে পারে। দয়া করে চেক করুন।';
                 }
                 
                 showError('login-error', errorMessage);
@@ -4110,17 +4110,17 @@
             const buttonText = document.getElementById('signup-button-text');
             
             if (!username || username.length < 3) {
-                showError('signup-error', 'Username must be at least 3 characters.');
+                showError('signup-error', 'ইউজারনেম কমপক্ষে ৩ অক্ষরের হতে হবে।');
                 return;
             }
             
             if (!email || !validateEmail(email)) {
-                showError('signup-error', 'Please enter a valid email address.');
+                showError('signup-error', 'অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা লিখুন।');
                 return;
             }
             
             if (!password || password.length < 6) {
-                showError('signup-error', 'Password must be at least 6 characters.');
+                showError('signup-error', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।');
                 return;
             }
             
@@ -4154,22 +4154,22 @@
                 let errorMessage = 'Signup failed. ';
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        errorMessage += 'Email already registered.';
+                        errorMessage += 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা আছে।';
                         break;
                     case 'auth/invalid-email':
-                        errorMessage += 'Invalid email address.';
+                        errorMessage += 'আপনার দেওয়া ইমেইলটি ভুল। আবার চেক করুন।';
                         break;
                     case 'auth/operation-not-allowed':
-                        errorMessage += 'Email/password accounts are not enabled.';
+                        errorMessage += 'এই মুহূর্তে ইমেইল ও পাসওয়ার্ড লগইন সিস্টেম বন্ধ রয়েছে।';
                         break;
                     case 'auth/weak-password':
-                        errorMessage += 'Password is too weak.';
+                        errorMessage += 'দয়া করে একটি শক্তিশালী পাসওয়ার্ড লিখুন।';
                         break;
                     case 'permission-denied':
-                        errorMessage += 'Server permission denied. Please contact support.';
+                        errorMessage += 'আপনার এই অনুরোধটি অনুমোদিত নয়। সহায়তার জন্য সাপোর্ট টিমের সাথে যোগাযোগ করুন।';
                         break;
                     default:
-                        errorMessage += 'Please try again.';
+                        errorMessage += 'অনুগ্রহ করে আবার চেষ্টা করুন।';
                 }
                 
                 showError('signup-error', errorMessage);
@@ -4206,7 +4206,7 @@
             const buttonText = document.getElementById('forgot-button-text');
             
             if (!email || !validateEmail(email)) {
-                showError('forgot-error', 'Please enter a valid email address.');
+                showError('forgot-error', 'অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা লিখুন।');
                 return;
             }
             
@@ -4216,7 +4216,7 @@
             try {
                 await auth.sendPasswordResetEmail(email);
                 
-                showSuccess('forgot-success', 'Password reset email sent! Check your inbox.');
+                showSuccess('forgot-success', 'পাসওয়ার্ড রিসেট ইমেইল পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স চেক করুন।.');
                 forgotButton.disabled = false;
                 buttonText.textContent = 'Send Reset Link';
                 document.getElementById('forgot-email').value = '';
@@ -4224,11 +4224,11 @@
             } catch (error) {
                 console.error('Forgot password error:', error);
                 
-                let errorMessage = 'Failed to send reset email. ';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'No account found with this email.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Invalid email address.';
+                let errorMessage = 'রিসেট লিংক পাঠানো যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন। ';
+                if (error.code === 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।') {
+                    errorMessage = 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট নেই 😊 অনুগ্রহ করে আগে সাইন আপ করুন।';
+                } else if (error.code === 'ইমেইল ঠিকানাটি সঠিক নয়। অনুগ্রহ করে একটি বৈধ ইমেইল লিখুন।') {
+                    errorMessage = 'ভুল ইমেইল দেওয়া হয়েছে। আবার চেষ্টা করুন।';
                 }
                 
                 showError('forgot-error', errorMessage);
@@ -4238,7 +4238,7 @@
         }
 
         function handleLogout() {
-            if (confirm('Are you sure you want to logout?')) {
+            if (confirm('')) {
                 if (validityCountdownInterval) {
                     clearInterval(validityCountdownInterval);
                 }
