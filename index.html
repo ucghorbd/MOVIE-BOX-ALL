@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.1/dist/hls.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -984,7 +985,7 @@
             backdrop-filter: blur(2px);
         }
 
-        /* VIDEO PLAYER */
+        /* VIDEO PLAYER - updated for HLS support */
         .video-player, .cast-full-view { 
             position: fixed; 
             top: 0; 
@@ -1008,7 +1009,8 @@
             background-color: #000;
         }
         
-        .video-player iframe { 
+        .video-player iframe, 
+        .video-player video { 
             width: 100%; 
             height: 100%; 
             border: 0;
@@ -3064,7 +3066,8 @@
 
             <!-- Video frame container -->
             <div class="video-frame-wrapper">
-                <iframe id="video-player-iframe" allowfullscreen></iframe>
+                <iframe id="video-player-iframe" allowfullscreen style="display: none;"></iframe>
+                <video id="video-player-video" controls style="width: 100%; height: 100%; display: none;"></video>
             </div>
 
             <!-- Bottom Floating Ad Slot -->
@@ -3817,6 +3820,7 @@
         let adInterval = null;
         let currentAdInterval = 0;
         let adCountdownInterval = null;
+        let currentHls = null; // For HLS.js instance
         
         // Ad settings
         let adsSettings = {
@@ -5912,29 +5916,61 @@
             }
         }
 
+        // New unified playStream function with HLS support
         function playStream(url) {
-            const player = document.getElementById('video-player-iframe');
-            const playerContainer = document.getElementById('video-player');
+            const iframe = document.getElementById('video-player-iframe');
+            const video = document.getElementById('video-player-video');
             
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            // Clean up existing HLS instance
+            if (currentHls) {
+                currentHls.destroy();
+                currentHls = null;
+            }
+            
+            // Determine type
+            const isM3U8 = url.includes('.m3u8') || url.includes('m3u8');
+            const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+            
+            if (isYouTube) {
+                // YouTube embed
                 const videoId = url.includes('youtube.com') ? 
                     url.split('v=')[1]?.split('&')[0] : 
                     url.split('youtu.be/')[1]?.split('?')[0];
-                player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            } else if (url.includes('.m3u8')) {
-                player.src = url;
+                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                iframe.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+            } else if (isM3U8) {
+                // HLS stream
                 if (Hls.isSupported()) {
-                    const hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(player);
+                    iframe.style.display = 'none';
+                    video.style.display = 'block';
+                    currentHls = new Hls();
+                    currentHls.loadSource(url);
+                    currentHls.attachMedia(video);
+                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Native HLS support (Safari)
+                    iframe.style.display = 'none';
+                    video.style.display = 'block';
+                    video.src = url;
+                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                } else {
+                    alert('HLS is not supported in this browser.');
+                    return;
                 }
             } else {
-                player.src = url;
+                // Direct video or other embed
+                iframe.src = url;
+                iframe.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
             }
             
+            const playerContainer = document.getElementById('video-player');
             playerContainer.style.display = 'flex';
             document.getElementById('back-btn').style.display = 'none';
-
+            
             renderFloatingAds(currentPlayingType);
             startIntervalAds();
         }
@@ -6077,11 +6113,16 @@
             if (playerContainer.style.display !== 'none') {
                 console.log('Showing interval ad');
                 
-                const player = document.getElementById('video-player-iframe');
-                try {
-                    player.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                } catch (e) {
-                    console.log('Could not pause video');
+                // Pause video if possible
+                const iframe = document.getElementById('video-player-iframe');
+                const video = document.getElementById('video-player-video');
+                if (iframe && iframe.contentWindow) {
+                    try {
+                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                    } catch(e) {}
+                }
+                if (video && !video.paused) {
+                    video.pause();
                 }
                 
                 showAdBeforePlay(null);
@@ -6089,8 +6130,22 @@
         }
 
         function closeVideoPlayer() {
-            document.getElementById('video-player').style.display = 'none';
-            document.getElementById('video-player-iframe').src = '';
+            const playerContainer = document.getElementById('video-player');
+            const iframe = document.getElementById('video-player-iframe');
+            const video = document.getElementById('video-player-video');
+            
+            // Stop video
+            if (video) {
+                video.pause();
+                video.src = '';
+            }
+            if (iframe) iframe.src = '';
+            if (currentHls) {
+                currentHls.destroy();
+                currentHls = null;
+            }
+            
+            playerContainer.style.display = 'none';
             document.getElementById('back-btn').style.display = 'block';
             
             if (adInterval) {
@@ -6336,7 +6391,12 @@
                 }
                 
                 if (coupon.expiresAt) {
-                    const expiryDate = coupon.expiresAt.toDate();
+                    let expiryDate;
+                    if (coupon.expiresAt.toDate) {
+                        expiryDate = coupon.expiresAt.toDate();
+                    } else {
+                        expiryDate = new Date(coupon.expiresAt);
+                    }
                     if (expiryDate < now) {
                         couponResult.innerHTML = '<p style="color: red;"><i class="fas fa-calendar-times"></i> This coupon has expired</p>';
                         return;
@@ -6415,6 +6475,9 @@
                         <p style="color: green;"><i class="fas fa-check-circle"></i> Success! ${extraDays} days added to your ${planName} plan!</p>
                         <p style="color: var(--secondary-text-color); font-size: 14px;">Your plan will expire on ${new Date(newExpiresAt).toLocaleDateString()}</p>
                     `;
+                } else {
+                    couponResult.innerHTML = '<p style="color: red;"><i class="fas fa-exclamation-triangle"></i> Invalid coupon benefit type.</p>';
+                    return;
                 }
                 
                 await db.collection('coupons').doc(code).update({
